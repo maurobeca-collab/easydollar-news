@@ -1,0 +1,77 @@
+/* ── Breaking news bar ── */
+.breaking {
+  background: var(--accent);
+  overflow: hidden;
+}
+.breaking > :global(.w) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-block: 7px;
+}
+.brkLabel {
+  flex-shrink: 0;
+  background: #03060d;
+  color: var(--accent);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.brkScroll { overflow: hidden; flex: 1; }
+.brkInner {
+  display: inline-block;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 700;
+  color: #03060d;
+  animation: mrq 50s linear infinite;
+}
+@keyframes mrq {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Platform CTA banner ── */
+.ctaBanner {
+  background: linear-gradient(135deg, rgba(0,232,122,.06), rgba(0,200,255,.04));
+  border-top: 1px solid rgba(0,232,122,.12);
+  border-bottom: 1px solid rgba(0,232,122,.12);
+  padding-block: 20px;
+}
+.ctaBanner > :global(.w) {}
+.ctaInner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.ctaInner strong {
+  font-family: var(--fh);
+  font-size: 20px;
+  font-weight: 800;
+  display: block;
+  margin-bottom: 4px;
+}
+.ctaInner p {
+  font-size: 13px;
+  color: var(--mid);
+  margin: 0;
+}
+.ctaBtn {
+  background: var(--accent);
+  color: #03060d !important;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  padding: 10px 22px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background .15s;
+  flex-shrink: 0;
+}
+.ctaBtn:hover { background: var(--ac2); }

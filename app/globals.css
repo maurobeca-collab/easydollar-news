@@ -1,0 +1,122 @@
+/* ── EasyDollar News — Global Styles ───────────────────────────── */
+/* Design: dark news portal · green accent · Barlow Condensed headlines */
+
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg:      #03060d;
+  --bg2:     #07111f;
+  --bg3:     #0d1829;
+  --bg4:     #111f33;
+  --accent:  #00e87a;
+  --ac2:     #00b85e;
+  --fg:      #e8eef8;
+  --mid:     #8aaccf;
+  --muted:   #3a5a7a;
+  --red:     #ff3d5a;
+  --gold:    #f5a623;
+  --cyan:    #00c8ff;
+  --purple:  #b478ff;
+  --border:  rgba(255,255,255,.06);
+  color-scheme: dark;
+  --fh: 'Barlow Condensed', sans-serif;
+  --fb: 'Inter', sans-serif;
+}
+
+/* single dark theme — deliberately committed for this product */
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--fb);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+a:hover { color: var(--accent); }
+img { max-width: 100%; display: block; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 2px; }
+
+/* ── Inner wrapper ── */
+.w {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ── Category tags ── */
+.tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+.tc  { background: rgba(0,232,122,.13); color: var(--accent); }
+.ta  { background: rgba(0,200,255,.12); color: var(--cyan); }
+.tf  { background: rgba(245,166,35,.13); color: var(--gold); }
+.tk  { background: rgba(255,61,90,.12);  color: var(--red); }
+.tm  { background: rgba(138,172,207,.1); color: var(--mid); }
+.te  { background: rgba(180,120,255,.13); color: var(--purple); }
+
+/* ── Article meta ── */
+.ameta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.ameta .src { color: var(--accent); font-weight: 600; }
+.ameta .dot { opacity: .4; }
+
+/* ── Live dot ── */
+.live-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--red);
+  display: inline-block;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: .5; transform: scale(.8); }
+}
+
+/* ── Section heading ── */
+.sh {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.sh-bar { width: 3px; height: 18px; background: var(--accent); border-radius: 2px; flex-shrink: 0; }
+.sh h2 {
+  font-family: var(--fh);
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0;
+}
+.sh::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── Responsive ── */
+@media (max-width: 960px) {
+  .hide-mobile { display: none !important; }
+}
+@media (max-width: 600px) {
+  .hide-sm { display: none !important; }
+}
