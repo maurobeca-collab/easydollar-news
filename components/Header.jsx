@@ -9,14 +9,14 @@ export default function Header() {
           <span className={styles.logoNews}>NEWS</span>
         </a>
 
-        <nav className={styles.nav} aria-label="Categorias">
-          <a href="#crypto">Cripto</a>
-          <a href="#acoes">Ações</a>
-          <a href="#forex">Forex</a>
-          <a href="#commodities">Commodities</a>
-          <a href="#mercados">Mercados</a>
-          <a href="#emergentes">Emergentes</a>
-        </nav>
+
+
+
+
+
+
+
+
 
         <div className={styles.right}>
           <span className={styles.live}>
