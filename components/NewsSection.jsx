@@ -61,12 +61,20 @@ function ArticleModal({ article, onClose }) {
             <p className={styles.modalSummary}>{article.summary}</p>
           )}
           <a
-            href={article.url}
+            href={`https://translate.google.com/translate?sl=en&tl=pt&u=${encodeURIComponent(article.url)}`}
             target="_blank"
             rel="noopener noreferrer"
             className={styles.modalReadBtn}
           >
-            Ler Artigo Original →
+            Ler Artigo Completo em Português →
+          </a>
+          <a
+            href={article.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.modalSourceLink}
+          >
+            Fonte original: {article.source}
           </a>
         </div>
       </div>
