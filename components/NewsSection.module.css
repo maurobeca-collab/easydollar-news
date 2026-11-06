@@ -227,6 +227,81 @@
 .feedTitle { font-size: 12px; font-weight: 500; line-height: 1.4; color: var(--fg); }
 .feedMeta { font-size: 11px; color: var(--muted); margin-top: 3px; }
 
+/* ── Article Modal ── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(3,6,13,.82);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modalBox {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+.modalClose {
+  position: sticky;
+  top: 0;
+  float: right;
+  margin: 14px 14px 0 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  color: var(--mid);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .15s;
+  z-index: 1;
+}
+.modalClose:hover { color: var(--fg); }
+.modalInner {
+  padding: 20px 24px 28px;
+}
+.modalTitle {
+  font-family: var(--fh);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.25;
+  text-wrap: balance;
+  color: var(--fg);
+  margin: 0 0 12px;
+}
+.modalSummary {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--mid);
+  margin: 0 0 24px;
+}
+.modalReadBtn {
+  display: inline-block;
+  background: var(--accent);
+  color: #03060d !important;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: 6px;
+  transition: background .15s;
+  text-decoration: none;
+}
+.modalReadBtn:hover { background: var(--ac2); }
+
 /* ── Responsive ── */
 @media (max-width: 960px) {
   .layout { grid-template-columns: 1fr; }
