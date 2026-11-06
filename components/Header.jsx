@@ -9,15 +9,6 @@ export default function Header() {
           <span className={styles.logoNews}>NEWS</span>
         </a>
 
-
-
-
-
-
-
-
-
-
         <div className={styles.right}>
           <span className={styles.live}>
             <span className="live-dot" aria-hidden="true" />
