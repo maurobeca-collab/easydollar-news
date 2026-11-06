@@ -1,42 +1,111 @@
-import { getSupabaseAdmin } from "../../../../lib/supabaseAdmin";
+// app/api/prices/route.js — Live market prices
 
-// Body: { code, stageId?, data?, currentStage?, status? }
-export async function POST(req) {
-  let body;
-  try { body = await req.json(); } catch { return Response.json({ error: "Bad request" }, { status: 400 }); }
-  const { code, stageId, data, currentStage, status } = body || {};
-  if (!code) return Response.json({ error: "Missing code" }, { status: 400 });
+import { NextResponse } from 'next/server'
 
-  const sb = getSupabaseAdmin();
+export const revalidate = 60
 
-  // Validate the code → resolve the starter (never trust an id from the client).
-  const { data: starter, error: e1 } = await sb.from("starters").select("id, status").eq("access_code", code).single();
-  if (e1 || !starter) return Response.json({ error: "Not found" }, { status: 404 });
+// CoinGecko crypto IDs
+const COINGECKO_IDS = 'bitcoin,ethereum,binancecoin,solana,ripple,dogecoin,avalanche-2,chainlink'
 
-  // Save the stage's data (the starter's own input for the current stage).
-  if (stageId && data) {
-    const { error } = await sb.from("stage_data").upsert({ starter_id: starter.id, stage_id: stageId, data });
-    if (error) return Response.json({ error: error.message }, { status: 500 });
-    // First time they touch anything, move them off "invited" so HR sees real activity.
-    if (starter.status === "invited" && !status) {
-      await sb.from("starters").update({ status: "in_progress" }).eq("id", starter.id);
-    }
+const COIN_DISPLAY = {
+  bitcoin:       { sym: 'BTC',  name: 'Bitcoin' },
+  ethereum:      { sym: 'ETH',  name: 'Ethereum' },
+  binancecoin:   { sym: 'BNB',  name: 'BNB' },
+  solana:        { sym: 'SOL',  name: 'Solana' },
+  ripple:        { sym: 'XRP',  name: 'XRP' },
+  dogecoin:      { sym: 'DOGE', name: 'Dogecoin' },
+  'avalanche-2': { sym: 'AVAX', name: 'Avalanche' },
+  chainlink:     { sym: 'LINK', name: 'Chainlink' },
+}
+
+// Yahoo Finance symbols for forex, commodities, indices
+const YAHOO_SYMBOLS = [
+  { ticker: 'EURUSD=X',  sym: 'EUR/USD', name: 'Euro / Dólar',    type: 'forex' },
+  { ticker: 'GBPUSD=X',  sym: 'GBP/USD', name: 'Libra / Dólar',   type: 'forex' },
+  { ticker: 'JPY=X',     sym: 'USD/JPY', name: 'Dólar / Iene',    type: 'forex' },
+  { ticker: 'GC=F',      sym: 'GOLD',    name: 'Ouro',             type: 'commodity' },
+  { ticker: 'CL=F',      sym: 'OIL',     name: 'Petróleo WTI',    type: 'commodity' },
+  { ticker: '^GSPC',     sym: 'S&P500',  name: 'S&P 500',          type: 'index' },
+  { ticker: '^IXIC',     sym: 'NASDAQ',  name: 'Nasdaq',           type: 'index' },
+]
+
+function formatPrice(price, type) {
+  if (type === 'forex') return price.toFixed(4)
+  if (price >= 10000) return price.toLocaleString('en-US', { maximumFractionDigits: 0 })
+  if (price >= 100)   return price.toLocaleString('en-US', { maximumFractionDigits: 2 })
+  return price.toFixed(2)
+}
+
+function fmtChange(pct) {
+  return `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`
+}
+
+async function fetchYahooPrices() {
+  try {
+    const tickers = YAHOO_SYMBOLS.map(s => s.ticker).join('%2C')
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${tickers}&fields=regularMarketPrice,regularMarketChangePercent`
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'application/json',
+      },
+      signal: AbortSignal.timeout(6000),
+    })
+    if (!res.ok) return null
+    const json = await res.json()
+    const quotes = json?.quoteResponse?.result || []
+    return quotes
+  } catch {
+    return null
   }
+}
 
-  // Advance / update status.
-  if (typeof currentStage === "number" || status) {
-    const patch = {};
-    if (typeof currentStage === "number") patch.current_stage = currentStage;
-    if (status) patch.status = status;
-    if (status === "completed") patch.completed_at = new Date().toISOString();
-    const { error } = await sb.from("starters").update(patch).eq("id", starter.id);
-    if (error) return Response.json({ error: error.message }, { status: 500 });
-    if (status === "completed") {
-      await sb.from("audit_log").insert({ starter_id: starter.id, actor: "starter", action: "completed onboarding" });
-    }
+export async function GET() {
+  try {
+    // Fetch crypto + yahoo in parallel
+    const [cryptoRes, yahooQuotes] = await Promise.all([
+      fetch(
+        `https://api.coingecko.com/api/v3/simple/price?ids=${COINGECKO_IDS}&vs_currencies=usd&include_24hr_change=true`,
+        { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(5000) }
+      ).then(r => r.json()).catch(() => ({})),
+      fetchYahooPrices(),
+    ])
+
+    // Build crypto prices
+    const cryptoPrices = Object.entries(cryptoRes).map(([id, vals]) => {
+      const display = COIN_DISPLAY[id] || { sym: id.toUpperCase(), name: id }
+      const change = vals.usd_24h_change ?? 0
+      return {
+        sym: display.sym,
+        name: display.name,
+        price: `$${formatPrice(vals.usd, 'crypto')}`,
+        change: fmtChange(change),
+        up: change >= 0,
+        type: 'crypto',
+      }
+    })
+
+    // Build forex/commodity/index prices
+    const marketPrices = YAHOO_SYMBOLS.map(item => {
+      const quote = yahooQuotes?.find(q => q.symbol === item.ticker)
+      const price = quote?.regularMarketPrice ?? null
+      const pct   = quote?.regularMarketChangePercent ?? null
+      const prefix = item.type === 'commodity' ? '$' : item.type === 'index' ? '' : ''
+      return {
+        sym:    item.sym,
+        name:   item.name,
+        price:  price != null ? `${prefix}${formatPrice(price, item.type)}` : null,
+        change: pct   != null ? fmtChange(pct) : null,
+        up:     pct   != null ? pct >= 0 : null,
+        type:   item.type,
+      }
+    })
+
+    return NextResponse.json(
+      { prices: [...cryptoPrices, ...marketPrices], fetchedAt: new Date().toISOString() },
+      { headers: { 'Cache-Control': 's-maxage=60, stale-while-revalidate=120' } }
+    )
+  } catch (err) {
+    return NextResponse.json({ prices: [], error: err.message }, { status: 500 })
   }
-
-  // Return the fresh record so the client can re-render from source of truth.
-  const { data: fresh } = await sb.rpc("get_starter_by_code", { p_code: code });
-  return Response.json(fresh);
 }
