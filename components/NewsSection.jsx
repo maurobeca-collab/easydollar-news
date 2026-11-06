@@ -191,7 +191,10 @@ export default function NewsSection({ articles = [] }) {
               )}
 
               {filtered.length === 0 && (
-                <div className={styles.empty}>A carregar notícias…</div>
+                <div className={styles.empty}>
+                  Nenhuma notícia disponível nesta categoria de momento.<br/>
+                  <span style={{ fontSize: '12px', opacity: .6 }}>As notícias são actualizadas a cada 15 minutos.</span>
+                </div>
               )}
             </div>
 
